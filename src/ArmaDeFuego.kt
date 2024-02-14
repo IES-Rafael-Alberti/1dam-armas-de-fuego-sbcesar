@@ -1,53 +1,45 @@
 import kotlin.random.Random
 
-abstract class ArmaDeFuego(private val nombre: String, private var municion: Int, private val municionARestar: Int, private val tipoDeMunicion: String, var cantidadMunicionExtra: Int = Random.nextInt(5,15)) {
+abstract class ArmaDeFuego(
+    private val nombre: String,
+    private var municion: Int,
+    private val municionARestar: Int,
+    private val tipoDeMunicion: String,
+) {
+    abstract val danio: Int
+    abstract var radio: TiposRadio
 
-    val danio: Int = 0
-    var radio: String = ""
-        set(value) {
-            radio.capitalize()
-            requireRadio()
-            field = value
-        }
-
-    init {
-        requireRadio()
+    companion object {
+        var cantidadMunicionExtra: Int = Random.nextInt(5,16)
     }
 
     fun dispara() {
-        if (municion == 0) {
-            recargar()
+        if (municion >= municionARestar || recargar()) {
             municion -= municionARestar
-        }
-        municion -= municionARestar
-    }
-
-    fun recargar(): Boolean {
-        val municionInicial = municion
-        dispara()
-        if (municion <= 0) {
-            cantidadMunicionExtra -= 1
-            if (cantidadMunicionExtra == -1) {
-                println("No hay suficiente munición extra para recargar.")
-                return false
-            } else {
-                println("$nombre recargado correctamente.")
-            }
+            println("$nombre dispara. Municion restante: $municion")
         } else {
-            municion = municionInicial
-            println("$nombre recargado correctamente.")
-            return true
+            println("No hay suficiente municion para disparar")
         }
-        return true
     }
 
-    private fun requireRadio() {
-        require(radio !in listOf<String>("Reducido","Corto","Intermedio","Amplio","Enorme")) { "Radio del arma erróneo" }
-        //require(radio !in TiposRadio) { "Alcance del arma erróneo" }
-    }
+    private fun recargar() =
+        if (cantidadMunicionExtra >= municionARestar) {
+
+            val cantidad =
+                if (cantidadMunicionExtra >= (municionARestar * 2)) municionARestar else municionARestar
+
+            municion += cantidad
+            cantidadMunicionExtra -= cantidad
+
+            println("$nombre recargada. Municion restante $municion")
+            true
+        } else {
+            println("No hay suficiente municion extra para recargar")
+            false
+        }
 
     override fun toString(): String {
-        return "Nombre: $nombre Municion: $municion Tipo de municion: $tipoDeMunicion Daño: $danio Radio: $radio"
+        return "Nombre: $nombre Municion: $municion Tipo de municion: $tipoDeMunicion Daño: $danio Radio: ${radio.desc}"
     }
 
 
